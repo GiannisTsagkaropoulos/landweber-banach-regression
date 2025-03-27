@@ -31,7 +31,7 @@ def rmse(Y, Yhat):
 
 def Landweber(X, y, MAXIT, p, b_start, tol=1e-6):
     Xt = X.T
-    mu = 1 / (np.linalg.norm(X) ** 2)
+    mu = 0.1 / (np.linalg.norm(X) ** 2)
     b_new = b_start
     q = p / (p - 1) 
     s = 2
@@ -77,8 +77,10 @@ def OLS_solution(X, Y):
 
 # Main testing function
 def test_methods(noise_sigma=0.1, noise_type="uniform", MAXIT=500):
-    X = uniform(100, 5)
-    b_true = np.random.uniform(low=0, high=1, size=(5, 1))
+    m = 1000
+    n = 50
+    X = uniform(m, n)
+    b_true = np.random.uniform(low=0, high=1, size=(n, 1))
     Y = X @ b_true
     Y_noisy = add_noise(Y, noise_sigma, noise_type)
     
