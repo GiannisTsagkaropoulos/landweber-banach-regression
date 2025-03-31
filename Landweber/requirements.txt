@@ -1,4 +1,7 @@
 # Run pip install -r requirements.txt    
 numpy
+pandas
+kagglehub
+shutil
 matplotlib
 scikit-learn
