@@ -3,8 +3,7 @@
 
 import numpy as np
 import pandas as pd
-import kagglehub
-import shutil
+from ucimlrepo import fetch_ucirepo
 import matplotlib.pyplot as plt
 import time
 from sklearn.metrics import mean_squared_error
@@ -12,7 +11,7 @@ from sklearn.linear_model import LinearRegression
 import os
 import sys
 
-sys.stderr = open(os.devnull, "w")
+#sys.stderr = open(os.devnull, "w")
 
 def generate_matrix(m, n, distribution="uniform"):
     if distribution == "uniform":
@@ -41,9 +40,9 @@ def J_duality_map(b, p, s):
 def rmse(Y, Yhat):
     return np.sqrt(mean_squared_error(Y, Yhat))
 
-def Landweber(X, y, MAXIT, p, b_start, tol=1e-3):
+def Landweber(X, y, MAXIT, p, b_start, tol=1e-6):
     Xt = X.T
-    mu = 0.1 / (np.linalg.norm(X) ** 2)
+    mu = 0.01 / (np.linalg.norm(X) ** 2)
     b_new = b_start
     q = p / (p - 1) 
     s = 2
@@ -121,32 +120,31 @@ def test_methods(X, Y, noise_sigma=0.1, noise_type="uniform", MAXIT=1000):
 
 def load_dataset(dataset_name):
     dataset_mapping = {
-        "glass": "uciml/glass",
-        "turkish_music": "joebeachcapital/turkish-music-emotion",
-        "wine_quality": "yasserh/wine-quality-dataset",
-        "breast_cancer": "uciml/breast-cancer-wisconsin-data",
-        "magic_gamma_telescope": "abhinand05/magic-gamma-telescope-dataset"
+        "glass_identification": 42, # mu = 0.1
+        "wine_quality": 186, # mu =0.1
+        "isolet": 54, # mu = 0.1
+        "pen_based_recognition_of_handwritten_digits": 81, # mu = 0.001
+        "airfoil_self_noise": 291, # mu = 0.01 OXI KAI TOSO KALO DATASET
+        "website_phishing": 379, # mu = 0.01
+         "combined_cycle_power_plant": 294 # mu = 0.01 (bgazei overflow alla kalo rmse), mu = 0.001 (den bgazei overflow alla xeirotero rmse)
     }
     
     if dataset_name not in dataset_mapping:
         raise ValueError("Dataset not found in predefined list.")
     
-    path = kagglehub.dataset_download(dataset_mapping[dataset_name])
-    csv_files = [f for f in os.listdir(path) if f.endswith(".csv")]
-    if not csv_files:
-        raise FileNotFoundError("No CSV file found in dataset folder.")
-    csv_file = csv_files[0]  # Pick first CSV file
-    df = pd.read_csv(os.path.join(path, csv_file))
-    local_path = os.path.join(os.getcwd(), f"{dataset_name}.csv")
-    shutil.copy(os.path.join(path, csv_file), local_path)
+    dataset = fetch_ucirepo(id=dataset_mapping[dataset_name])
+    X = dataset.data.features
+    y = dataset.data.targets
     
-    X = df.iloc[:, :-1].values  # Features
-    y = df.iloc[:, -1].values.reshape(-1, 1)  # Labels as column vector
+    # Convert to DataFrame for saving
+    df = pd.concat([X, y], axis=1)
+    local_path = os.path.join(os.getcwd(), f"{dataset_name}.csv")
+    df.to_csv(local_path, index=False)
     
     print(f"Dataset {dataset_name} loaded successfully and saved locally!")
-    return X, y
+    return X.values, y.values.reshape(-1, 1)
 
 # Example usage
-X, Y = load_dataset("magic_gamma_telescope")
+X, Y = load_dataset("combined_cycle_power_plant")
 test_methods(X, Y)
 # test_methods(generate_matrix(500, 100, distribution="uniform"))

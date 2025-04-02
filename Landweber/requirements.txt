@@ -1,7 +1,6 @@
 # Run pip install -r requirements.txt    
-numpy
-pandas
-kagglehub
-shutil
-matplotlib
-scikit-learn
+numpy==2.2.3
+pandas==2.2.3
+ucimlrepo==0.0.7
+matplotlib==3.10.1
+scikit-learn==1.6.1
