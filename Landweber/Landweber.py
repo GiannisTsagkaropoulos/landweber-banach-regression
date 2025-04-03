@@ -257,3 +257,28 @@ def simulated_data():
 
 
 simulated_data()
+
+# --- Simulated data ---
+# benchmark_data = { //keys are columns
+#     5: { //keys are rows -> (50,5) design matrix etc...
+#         50: {'landweber_time': 9.201084852218628, 'landweber_rmse': np.float64(0.0004352763317473863), 'ols_time': 0.007337093353271484, 'ols_rmse': np.float64(0.30610172360285975)},
+#         100: {'landweber_time': 6.7429139614105225, 'landweber_rmse': np.float64(3.9526075800953006e-05), 'ols_time': 0.00041604042053222656, 'ols_rmse': np.float64(0.2843897313122302)},
+#         250: {'landweber_time': 6.311493158340454, 'landweber_rmse': np.float64(2.1406425335692127e-05), 'ols_time': 0.0004620552062988281, 'ols_rmse': np.float64(0.31778657266596677)},
+#         350: {'landweber_time': 6.658552885055542, 'landweber_rmse': np.float64(2.6325787184349344e-05), 'ols_time': 0.0026092529296875, 'ols_rmse': np.float64(0.3122532120447918)},
+#         500: {'landweber_time': 5.762638092041016, 'landweber_rmse': np.float64(1.2143653298255198e-05), 'ols_time': 0.0004801750183105469, 'ols_rmse': np.float64(0.3176851510409322)}
+#     },
+#     7: {
+#         70: {'landweber_time': 11.598745822906494, 'landweber_rmse': np.float64(0.0002145684081750422), 'ols_time': 0.0011789798736572266, 'ols_rmse': np.float64(0.332644235722981)},
+#         140: {'landweber_time': 7.850435018539429, 'landweber_rmse': np.float64(0.00013392624318127766), 'ols_time': 0.0004391670227050781, 'ols_rmse': np.float64(0.2921672192379161)},
+#         350: {'landweber_time': 8.203042030334473, 'landweber_rmse': np.float64(0.0004935043620940951), 'ols_time': 0.0005908012390136719, 'ols_rmse': np.float64(0.31373158357136743)},
+#         490: {'landweber_time': 8.057960033416748, 'landweber_rmse': np.float64(0.00014468370814481028), 'ols_time': 0.00047779083251953125, 'ols_rmse': np.float64(0.31251916595130963)},
+#         700: {'landweber_time': 7.60652494430542, 'landweber_rmse': np.float64(3.222495894119661e-05), 'ols_time': 0.0024902820587158203, 'ols_rmse': np.float64(0.3108450054951852)}
+#     },
+#     10: {
+#         100: {'landweber_time': 9.486278295516968, 'landweber_rmse': np.float64(0.0007396925344087137), 'ols_time': 0.0004527568817138672, 'ols_rmse': np.float64(0.29332221882929993)},
+#         200: {'landweber_time': 8.699727773666382, 'landweber_rmse': np.float64(0.00017741582695153627), 'ols_time': 0.0004391670227050781, 'ols_rmse': np.float64(0.3127030477810623)},
+#         500: {'landweber_time': 7.928871154785156, 'landweber_rmse': np.float64(4.388874789405075e-05), 'ols_time': 0.0007069110870361328, 'ols_rmse': np.float64(0.29682131957464886)},
+#         700: {'landweber_time': 8.922483205795288, 'landweber_rmse': np.float64(9.926272179680093e-05), 'ols_time': 0.0005257129669189453, 'ols_rmse': np.float64(0.3084091669552287)},
+#         1000: {'landweber_time': 9.126970052719116, 'landweber_rmse': np.float64(8.533387574285899e-05), 'ols_time': 0.0005650520324707031, 'ols_rmse': np.float64(0.29952050790767953)}
+#     }
+# }
