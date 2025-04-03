@@ -161,8 +161,8 @@ def load_dataset(dataset_name):
     return X.values, y.values.reshape(-1, 1)
 
 # Example usage
-X, Y = load_dataset("combined_cycle_power_plant")
-test_methods(X, Y)
+# X, Y = load_dataset("combined_cycle_power_plant")
+# test_methods(X, Y)
 
 def test_simulated_data(X,Y, add_noise_flag=True, noise_sigma = 0.1, noise_type="uniform"):
     if (add_noise_flag): 
@@ -209,34 +209,47 @@ def plot_benchmark_data(benchmark_data):
         landweber_rmses = [data_for_col[r_key]['landweber_rmse'] for r_key in row_keys]
         ols_rmses = [data_for_col[r_key]['ols_rmse'] for r_key in row_keys]
 
-        # --- Plotting Setup ---
+       # --- Plotting Setup ---
         x = np.arange(len(row_labels))  # the label locations
         bar_width = 0.35  # the width of the bars
 
-        # --- Plot 1: Time Comparison ---
-        plt.figure(figsize=(10, 6))
-        plt.bar(x - bar_width/2, landweber_times, bar_width, label='Landweber Time', color='green')
-        plt.bar(x + bar_width/2, ols_times, bar_width, label='OLS Time', color='blue')
-        plt.xlabel('Number of Rows')
-        plt.ylabel('Time (seconds)')
-        plt.title(f'Time Comparison (Columns = {col_val})')
-        plt.xticks(x, row_labels)
-        plt.legend()
-        plt.savefig(f"columns-{col_val}_time.png")
+        # --- Create Figure with Subplots ---
+        # Create 1 row, 2 columns of subplots. Adjust figsize for better layout.
+        fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+
+        # --- Plot 1: Time Comparison (on the left subplot axes[0]) ---
+        ax1 = axes[0] # Use the first axes object
+        rects1_time = ax1.bar(x - bar_width/2, landweber_times, bar_width, label='Landweber Time', color='green')
+        rects2_time = ax1.bar(x + bar_width/2, ols_times, bar_width, label='OLS Time', color='blue')
+
+        # Add some text for labels, title and axes ticks for the first subplot
+        ax1.set_ylabel('Time (seconds)')
+        ax1.set_xlabel(f'Number of Rows (Number of Columns = {col_val})')
+        ax1.set_title('Execution Time Comparison: Landweber vs OLS')
+        ax1.set_xticks(x)
+        ax1.set_xticklabels(row_labels)
+        ax1.legend()
+ 
+        # --- Plot 2: RMSE Comparison (on the right subplot axes[1]) ---
+        ax2 = axes[1] # Use the second axes object
+        rects1_rmse = ax2.bar(x - bar_width/2, landweber_rmses, bar_width, label='Landweber RMSE', color='green')
+        rects2_rmse = ax2.bar(x + bar_width/2, ols_rmses, bar_width, label='OLS RMSE', color='blue')
+
+        # Add some text for labels, title and axes ticks for the second subplot
+        ax2.set_ylabel('RMSE')
+        ax2.set_xlabel(f'Number of Rows (Number of Columns = {col_val})')
+        ax2.set_title('RMSE Comparison: Landweber vs OLS')
+        ax2.set_xticks(x)
+        ax2.set_xticklabels(row_labels)
+        ax2.legend()
+
+        # --- Adjust Layout and Display ---
+        fig.tight_layout() # Adjust layout for the entire figure
+        # plt.show() # Display the figure containing both subplots
+        plt.savefig(f"columns-{col_val}.png")
         plt.close()
 
-        # --- Plot 2: RMSE Comparison ---
-        plt.figure(figsize=(10, 6))
-        plt.bar(x - bar_width/2, landweber_rmses, bar_width, label='Landweber RMSE', color='green')
-        plt.bar(x + bar_width/2, ols_rmses, bar_width, label='OLS RMSE', color='blue')
-        plt.xlabel('Number of Rows')
-        plt.ylabel('RMSE')
-        plt.title(f'RMSE Comparison (Columns = {col_val})')
-        plt.xticks(x, row_labels)
-        plt.legend()
-        plt.savefig(f"columns-{col_val}_rmse.png")
-        print("Saved RMSE and time plot for columns = ", col_val)
-        plt.close()
+
 
 def simulated_data():
     benchmark_data = dict()
@@ -259,8 +272,8 @@ def simulated_data():
 simulated_data()
 
 # --- Simulated data ---
-# benchmark_data = { //keys are columns
-#     5: { //keys are rows -> (50,5) design matrix etc...
+# benchmark_data = { #keys are columns
+#     5: { #keys are rows -> (50,5) design matrix etc...
 #         50: {'landweber_time': 9.201084852218628, 'landweber_rmse': np.float64(0.0004352763317473863), 'ols_time': 0.007337093353271484, 'ols_rmse': np.float64(0.30610172360285975)},
 #         100: {'landweber_time': 6.7429139614105225, 'landweber_rmse': np.float64(3.9526075800953006e-05), 'ols_time': 0.00041604042053222656, 'ols_rmse': np.float64(0.2843897313122302)},
 #         250: {'landweber_time': 6.311493158340454, 'landweber_rmse': np.float64(2.1406425335692127e-05), 'ols_time': 0.0004620552062988281, 'ols_rmse': np.float64(0.31778657266596677)},
@@ -282,3 +295,6 @@ simulated_data()
 #         1000: {'landweber_time': 9.126970052719116, 'landweber_rmse': np.float64(8.533387574285899e-05), 'ols_time': 0.0005650520324707031, 'ols_rmse': np.float64(0.29952050790767953)}
 #     }
 # }
+
+# plot_benchmark_data(benchmark_data)
+
