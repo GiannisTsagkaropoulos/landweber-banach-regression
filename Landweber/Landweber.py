@@ -3,14 +3,13 @@
 
 import numpy as np
 import pandas as pd
+from pyparsing import col
 from ucimlrepo import fetch_ucirepo
 import matplotlib.pyplot as plt
 import time
 from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import LinearRegression
 import os
-import sys
-
 #sys.stderr = open(os.devnull, "w")
 
 def generate_matrix(m, n, distribution="uniform"):
@@ -65,10 +64,10 @@ def Landweber(X, y, MAXIT, p, b_start, tol=1e-6):
     return b_new, rmse_list
 
 def optimize_p(X, Y, MAXIT):
-    m, n = X.shape
-    b_true = np.random.uniform(low=0, high=1, size=(n, 1))
+    rows, cols = X.shape
+    b_true = np.random.uniform(low=0, high=1, size=(cols, 1))
     Y = X @ b_true
-    b_start = np.random.uniform(low=0, high=1, size=(n, 1))
+    b_start = np.random.uniform(low=0, high=1, size=(cols, 1))
     
     best_p, best_b, best_rmse, best_rmse_list = None, None, float('inf'), []
     
@@ -86,10 +85,12 @@ def OLS_solution(X, Y):
     model.fit(X, Y)
     return model.coef_.T
 
-def test_methods(X, Y, noise_sigma=0.1, noise_type="uniform", MAXIT=1000):
-    m, n = X.shape
-    print(f"\nCase: Overdetermined (m={m}, n={n})")
-    
+def test_methods(X, Y, noise_sigma=0.1, noise_type="uniform", MAXIT=5000):
+    rows, cols = X.shape
+    if (rows < cols):
+        print(f"\nCase: Underdetermined (rows={rows}, cols={cols})")
+    else:    
+        print(f"\nCase: Overdetermined (rows={rows}, cols={cols})")
     Y_noisy = add_noise(Y, noise_sigma, noise_type)
 
     # Landweber method
@@ -115,6 +116,21 @@ def test_methods(X, Y, noise_sigma=0.1, noise_type="uniform", MAXIT=1000):
     plt.title(f"RMSE Decrease Over Iterations (Overdetermined, {noise_type} noise)")
     plt.grid()
     plt.show()
+    return {"landweber_time": landweber_time,  "landweber_rmse": best_rmse, "ols_time": solve_time, "ols_rmse": rmse_solution}
+
+def svd_solution(X, Y):    
+    U, S, Vt = np.linalg.svd(X, full_matrices=False)
+    
+    # Compute pseudo-inverse of Sigma
+    S_pinv = np.diag(1 / S)  # Invert nonzero singular values
+    
+    # Compute pseudo-inverse of X
+    X_pinv = Vt.T @ S_pinv @ U.T
+    
+    # Compute solution b
+    b = X_pinv @ Y
+    
+    return b
 
 # Function to load dataset from KaggleHub
 
@@ -147,4 +163,3 @@ def load_dataset(dataset_name):
 # Example usage
 X, Y = load_dataset("combined_cycle_power_plant")
 test_methods(X, Y)
-# test_methods(generate_matrix(500, 100, distribution="uniform"))
