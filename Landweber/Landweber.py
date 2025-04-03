@@ -12,6 +12,20 @@ from sklearn.linear_model import LinearRegression
 import os
 #sys.stderr = open(os.devnull, "w")
 
+# We want to solve iteratively system Y = X*b using Landweber method with a twist of J-duality map. 
+# We construct matrices X and b from uniform or normal distribution
+
+import numpy as np
+import pandas as pd
+from pyparsing import col
+from ucimlrepo import fetch_ucirepo
+import matplotlib.pyplot as plt
+import time
+from sklearn.metrics import mean_squared_error
+from sklearn.linear_model import LinearRegression
+import os
+#sys.stderr = open(os.devnull, "w")
+
 def generate_matrix(m, n, distribution="uniform"):
     if distribution == "uniform":
         return np.random.uniform(low=0, high=1, size=(m, n))
@@ -250,7 +264,6 @@ def plot_benchmark_data(benchmark_data):
         plt.close()
 
 
-
 def simulated_data():
     benchmark_data = dict()
 
@@ -268,8 +281,77 @@ def simulated_data():
     print(benchmark_data)    
     plot_benchmark_data(benchmark_data)
 
+def benchmark_real_datasets():
+    dataset_names = [
+        "glass_identification",
+        "wine_quality",
+        "isolet",
+        "pen_based_recognition_of_handwritten_digits",
+        "airfoil_self_noise",
+        "website_phishing",
+        "combined_cycle_power_plant"
+    ]
 
-simulated_data()
+    benchmark_data = {}
+
+    for dataset in dataset_names:
+        print(f"\n--- Benchmarking on Dataset: {dataset} ---")
+        try:
+            X, Y = load_dataset(dataset)
+            results = test_simulated_data(X, Y)
+            benchmark_data[dataset] = results
+        except Exception as e:
+            print(f"Error loading dataset {dataset}: {e}")
+            continue
+
+    print("\nBenchmarking Results:")
+    print(benchmark_data)
+
+    # Plot results for real datasets
+    plot_real_dataset_benchmarks(benchmark_data)
+
+def plot_real_dataset_benchmarks(benchmark_data):
+    """
+    Plots execution time and RMSE for real datasets.
+    """
+    datasets = list(benchmark_data.keys())
+    landweber_times = [benchmark_data[ds]["landweber_time"] for ds in datasets]
+    ols_times = [benchmark_data[ds]["ols_time"] for ds in datasets]
+    landweber_rmses = [benchmark_data[ds]["landweber_rmse"] for ds in datasets]
+    ols_rmses = [benchmark_data[ds]["ols_rmse"] for ds in datasets]
+
+    x = np.arange(len(datasets))
+    bar_width = 0.35
+
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+
+    # Execution Time Plot
+    ax1 = axes[0]
+    ax1.bar(x - bar_width/2, landweber_times, bar_width, label="Landweber Time", color="green")
+    ax1.bar(x + bar_width/2, ols_times, bar_width, label="OLS Time", color="blue")
+    ax1.set_ylabel("Time (seconds)")
+    ax1.set_xlabel("Dataset")
+    ax1.set_title("Execution Time Comparison: Landweber vs OLS")
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(datasets, rotation=45, ha="right")
+    ax1.legend()
+
+    # RMSE Plot
+    ax2 = axes[1]
+    ax2.bar(x - bar_width/2, landweber_rmses, bar_width, label="Landweber RMSE", color="green")
+    ax2.bar(x + bar_width/2, ols_rmses, bar_width, label="OLS RMSE", color="blue")
+    ax2.set_ylabel("RMSE")
+    ax2.set_xlabel("Dataset")
+    ax2.set_title("RMSE Comparison: Landweber vs OLS")
+    ax2.set_xticks(x)
+    ax2.set_xticklabels(datasets, rotation=45, ha="right")
+    ax2.legend()
+
+    fig.tight_layout()
+    plt.show()
+
+benchmark_real_datasets()
+#simulated_data()
 
 # --- Simulated data ---
 # benchmark_data = { #keys are columns
@@ -297,4 +379,3 @@ simulated_data()
 # }
 
 # plot_benchmark_data(benchmark_data)
-
