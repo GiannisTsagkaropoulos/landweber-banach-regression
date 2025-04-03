@@ -163,3 +163,97 @@ def load_dataset(dataset_name):
 # Example usage
 X, Y = load_dataset("combined_cycle_power_plant")
 test_methods(X, Y)
+
+def test_simulated_data(X,Y, add_noise_flag=True, noise_sigma = 0.1, noise_type="uniform"):
+    if (add_noise_flag): 
+        Y = add_noise(Y, noise_sigma, noise_type)
+        
+    # Landweber method
+    start_time = time.time()
+    best_p, best_b, best_rmse, best_rmse_list = optimize_p(X, Y, 500)
+    landweber_time = time.time() - start_time
+
+    # OLS Solution
+    start_time = time.time()
+    b_solution = OLS_solution(X, Y)
+    solve_time = time.time() - start_time
+    rmse_solution = rmse(Y, X @ b_solution)
+
+    return {"landweber_time": landweber_time, "landweber_rmse": best_rmse, "ols_time": solve_time, "ols_rmse": rmse_solution}
+
+def plot_benchmark_data(benchmark_data):
+    """
+    Plots time and RMSE comparisons for benchmark data, creating separate graphs for each column.
+
+    Args:
+        benchmark_data (dict): A nested dictionary where keys are column counts,
+                               and values are dictionaries keyed by row counts,
+                               containing 'landweber_time', 'ols_time', etc.
+    """
+    if not benchmark_data:
+        print("Error: Benchmark data dictionary is empty.")
+        return
+
+    for col_val, data_for_col in benchmark_data.items():
+        row_keys = sorted(data_for_col.keys())
+
+        if not row_keys:
+            print(f"Warning: No row data found for column value {col_val}. Skipping this column.")
+            continue
+
+        row_labels = row_keys  # The keys are the row counts now
+
+        # --- Data Extraction for the current col_val ---
+        landweber_times = [data_for_col[r_key]['landweber_time'] for r_key in row_keys]
+        ols_times = [data_for_col[r_key]['ols_time'] for r_key in row_keys]
+        landweber_rmses = [data_for_col[r_key]['landweber_rmse'] for r_key in row_keys]
+        ols_rmses = [data_for_col[r_key]['ols_rmse'] for r_key in row_keys]
+
+        # --- Plotting Setup ---
+        x = np.arange(len(row_labels))  # the label locations
+        bar_width = 0.35  # the width of the bars
+
+        # --- Plot 1: Time Comparison ---
+        plt.figure(figsize=(10, 6))
+        plt.bar(x - bar_width/2, landweber_times, bar_width, label='Landweber Time', color='green')
+        plt.bar(x + bar_width/2, ols_times, bar_width, label='OLS Time', color='blue')
+        plt.xlabel('Number of Rows')
+        plt.ylabel('Time (seconds)')
+        plt.title(f'Time Comparison (Columns = {col_val})')
+        plt.xticks(x, row_labels)
+        plt.legend()
+        plt.savefig(f"columns-{col_val}_time.png")
+        plt.close()
+
+        # --- Plot 2: RMSE Comparison ---
+        plt.figure(figsize=(10, 6))
+        plt.bar(x - bar_width/2, landweber_rmses, bar_width, label='Landweber RMSE', color='green')
+        plt.bar(x + bar_width/2, ols_rmses, bar_width, label='OLS RMSE', color='blue')
+        plt.xlabel('Number of Rows')
+        plt.ylabel('RMSE')
+        plt.title(f'RMSE Comparison (Columns = {col_val})')
+        plt.xticks(x, row_labels)
+        plt.legend()
+        plt.savefig(f"columns-{col_val}_rmse.png")
+        print("Saved RMSE and time plot for columns = ", col_val)
+        plt.close()
+
+def simulated_data():
+    benchmark_data = dict()
+
+    row_factors = [10,20,50,70,100]
+    col_values = [5, 10, 20]
+    distribution="uniform"
+    for cols in col_values:
+        benchmark_data[cols] = dict()
+        for row_factor in row_factors:
+            rows = row_factor*cols
+            print("pair: ", (rows, cols))
+            X = generate_matrix(rows, cols, distribution)
+            Y = generate_matrix(rows, 1, distribution)
+            benchmark_data[cols][rows] = test_simulated_data(X, Y)
+    print(benchmark_data)    
+    plot_benchmark_data(benchmark_data)
+
+
+simulated_data()
